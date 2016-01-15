@@ -1,15 +1,26 @@
 import pygame, sys, os, time
 from pygame.locals import * 
 
+#variables globales
+#n: es el numero de celdas que se mostraran en pantalla
 n = 36
+#velocidad: es la velocidad de sleep(si no esta comentado)
 velocidad = 1
 color = (0,0,0)
+#rectangulos: es un arreglo de n x n para los rectangulos de las celdas en pantalla
 rectangulos = [[0 for x in range(n)] for x in range(n)]
+#mapa: es un mapa de las celdas mostradas en pantalla que se usa para saber que celdas estan vivas o muertas
+#      y para contar vecinas, me parecio mas facil usar esto para poder controlar mejor las celdas vivas y muertas
+#      ya que controlar si los rect de pygame tenian un circulo o no me parecia que usaria mucha memoria.
 mapa = [[0 for x in range(n)] for x in range(n)]
+#listaPuntos: es una lista con las posiciones de los centros de ciertos rect de pygame para poder dibujar los circulos
+#             en pantalla.
 listaPuntos = []
 
+#Este metodo cuenta vecinas de la celda de la columna "j" fila "i" creando un cuadrado que esta conformado por las celdas 
+#que rodean la celda para luego con un ciclo recorrer el cuadrado con los bordes controlados contando celdas vivas y al
+#final resta uno si la celda actual esta viva para que no se cuente.
 def vecinas(j, i):
-   #SE CREA UN CUADRADO CON LOS BORDES CONTROLADOS PARA CONTAR CELDAS VECINAS 
    cont = 0
    if(i == 0):
       ysup = i
@@ -35,6 +46,8 @@ def vecinas(j, i):
       cont = cont - 1
    return cont
 
+#Este metodo se usa al final para imprimir en consola la posicion de las ultimas celdas vivas y muertas mostradas
+#en pantalla.
 def imprimirmapa(mapa):
    for i in range(n):
       cad = ""
@@ -45,6 +58,7 @@ def imprimirmapa(mapa):
             cad += "_ "
       print cad
 
+#generaciones: se encarga de controlar las condiciones del juego de la vida
 def generaciones(listaPuntos):
  global mapa
  nuevomapa = [[0 for x in range(n)] for x in range(n)]
@@ -67,8 +81,9 @@ def generaciones(listaPuntos):
             listaPuntos.append(centroCirculo)
  mapa = nuevomapa
  return listaPuntos
-
+#siguienteGeneracion: limpia lista de puntos y llama a generaciones para calcular la siguiente generacion.
 def siguienteGeneracion(listaPuntos):
+   #se borra completamente la lista de puntos para evitar que se pinten puntos no deseados
    listaPuntos[:] = []
    generaciones(listaPuntos)
    return listaPuntos
@@ -94,15 +109,24 @@ def texto(texto, posx, posy, color=(255, 255, 255)):
     salida_rect.centery = posy
     return salida, salida_rect
 
+#inicializa pygame
 pygame.init()  
 
+#tamaño de pantalla, dimension de rectangulos, visibilidad del mouse
 screen = pygame.display.set_mode((650, 750))  
 dim = 650/n
 pygame.mouse.set_visible(1)
 
+#se añade titulo a la ventana
 titulo = "JuegoVida"
 pygame.display.set_caption(titulo)  
 
+#Se carga la imagen de fondo y se toma el rect
+#Obs: -Porque no se pone un color especifico de fondo-
+#   no lo hice de esa manera porque pygame al tener un color de fondo no lo vuelve a pintar encima
+#   del resto de cosas que pinto en el ciclo anterior por lo que queda manchado con restos de los 
+#   dibujos anteriores y eso se mira fatal, por lo tanto opte por poner una imagen de fondo para
+#   solucionar ese detalle, ya que creo que es la unica forma.
 fondoI = load_image("images/fondo.png")
 fondo = fondoI.get_rect()
 
@@ -133,7 +157,10 @@ botonUp.centery = 667
 botonDown.centerx = 16
 botonDown.centery =697
 
+#play_act: Booleano para saber si el play se ah presionado o no.
 play_act = False
+
+#ciclo principal
 while True:
     #se toman los eventos(si hay) y se guardan en eventos
     eventos = pygame.event.get()  
